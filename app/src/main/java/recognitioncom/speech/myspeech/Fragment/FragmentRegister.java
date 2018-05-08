@@ -56,12 +56,19 @@ public class FragmentRegister extends Fragment implements View.OnClickListener{
 
     private void register(){
         try{
-            new NetworkConnectionManager().callRegister(listener,etName.getText().toString().trim(),
-                    etEmail.getText().toString().trim(),
-                    etPassword.getText().toString().trim());
-            progress = new ProgressDialog(context);
-            progress.setMessage(getString(R.string.progressLoading));
-            progress.show();
+           String name =  etName.getText().toString().trim();
+           String email = etEmail.getText().toString().trim();
+           String password = etPassword.getText().toString().trim();
+            if(!name.isEmpty() && !email.isEmpty() &&  !password.isEmpty()){
+                new NetworkConnectionManager().callRegister(listener,name,email,password);
+                progress = new ProgressDialog(context);
+                progress.setMessage(getString(R.string.progressLoading));
+                progress.show();
+            }else{
+                Toast.makeText(context, "กรุณากรอกข้อมูลให้ครบ", Toast.LENGTH_SHORT).show();
+            }
+
+
         }catch (Exception e){
             Log.e(TAG,e.getMessage());
         }

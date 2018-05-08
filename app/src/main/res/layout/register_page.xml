@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:gravity="center"
-    android:background="#e3ef69e6"
+    android:background="#e3e7cde5"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TextView
@@ -49,6 +49,7 @@
             android:layout_height="wrap_content" />
         <LinearLayout
             android:gravity="center"
+            android:layout_marginBottom="30dp"
             android:layout_marginTop="30dp"
             android:orientation="horizontal"
             android:layout_width="match_parent"
@@ -56,7 +57,7 @@
             <Button
                 android:id="@+id/btnRegister"
                 android:text="@string/btnRegister"
-                android:backgroundTint="@color/colorPrimaryDark"
+                android:backgroundTint="#494949"
                 android:textColor="#FFF"
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"
@@ -65,7 +66,7 @@
                 android:id="@+id/btnReset"
                 android:text="@string/btnReset"
                 android:layout_marginLeft="20dp"
-                android:backgroundTint="@color/bootstrap_brand_info"
+                android:backgroundTint="#494949"
                 android:textColor="#FFF"
                 android:layout_gravity="center"
                 android:layout_width="wrap_content"

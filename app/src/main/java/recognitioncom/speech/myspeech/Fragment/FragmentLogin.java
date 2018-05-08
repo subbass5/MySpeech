@@ -5,6 +5,9 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.speech.RecognizerIntent;
@@ -22,6 +25,7 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -43,11 +47,12 @@ public class FragmentLogin extends Fragment implements View.OnClickListener{
     private EditText et_user,et_pwd;
 
 
-    private final int REQ_CODE_SPEECH_INPUT = 1001;
+
     public static final String MYFER = "myFer";
     public static final String KEY_ID = "idUser";
     public static final String KEY_NAME ="nameUser";
     public static final String KEY_EMAIL = "emailUser";
+    public static final String KEY_CATEGORY = "category";
     private String usr = "";
     private String pwd = "";
     private String TAG = "FragmentLogin";
@@ -62,20 +67,20 @@ public class FragmentLogin extends Fragment implements View.OnClickListener{
 
         ((AppCompatActivity) getActivity()).getSupportActionBar().hide(); // hide tools bar
 
-        MyTTS.getInstance(getContext()).setLocale(new Locale("th"))
-                .speak("ยินดีต้อนรับสู่เกมทายเสียง");
-        new CountDownTimer(3000,1000) {
-            @Override
-            public void onTick(long millisUntilFinished) {
-
-            }
-
-            @Override
-            public void onFinish() {
-                MyTTS.getInstance(getContext()).setLocale(new Locale("th"))
-                        .speak("ดึงหน้าจอลงเพื่อสั่งงาน");
-            }
-        }.start();
+//        MyTTS.getInstance(getContext()).setLocale(new Locale("th"))
+//                .speak("ยินดีต้อนรับสู่เกมทายเสียง");
+//        new CountDownTimer(3000,1000) {
+//            @Override
+//            public void onTick(long millisUntilFinished) {
+//
+//            }
+//
+//            @Override
+//            public void onFinish() {
+//                MyTTS.getInstance(getContext()).setLocale(new Locale("th"))
+//                        .speak("ดึงหน้าจอลงเพื่อสั่งงาน");
+//            }
+//        }.start();
 
         init(v);
 
@@ -106,15 +111,22 @@ public class FragmentLogin extends Fragment implements View.OnClickListener{
 
     private void login(){
 
+
+
+
         usr = et_user.getText().toString().trim();
         pwd = et_pwd.getText().toString().trim();
 
-        progress = new ProgressDialog(context);
-        progress.setMessage(getString(R.string.progressLoading));
-        progress.show();
+        if(usr.length() >3 && usr.length() >3 ){
+
+            progress = new ProgressDialog(context);
+            progress.setMessage(getString(R.string.progressLoading));
+            progress.show();
+
+            new NetworkConnectionManager().callLogin(listener,usr,pwd);
+        }
 
 
-        new NetworkConnectionManager().callLogin(listener,usr,pwd);
 
 
     }
@@ -193,45 +205,6 @@ public class FragmentLogin extends Fragment implements View.OnClickListener{
         }
     };
 
-    private void promptSpeechInput() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "th-TH");
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-                getString(R.string.speech_prompt));
-
-
-        try {
-            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
-        } catch (ActivityNotFoundException a) {
-            Toast.makeText(context,
-                    getString(R.string.speech_not_supported),
-                    Toast.LENGTH_SHORT).show();
-        }
-    }
-    /**
-     * Receiving speech input
-     * */
-    @Override
-     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        switch (requestCode) {
-            case REQ_CODE_SPEECH_INPUT: {
-                if (resultCode == RESULT_OK && null != data) {
-
-                    ArrayList<String> result = data
-                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    MyTTS.getInstance(context).setLocale(new Locale("th")).speak(" "+result.get(0));
-                    Toast.makeText(context, result.get(0), Toast.LENGTH_SHORT).show();
-                }
-                break;
-            }
-
-        }
-    }
-
-
 
     @Override
     public void onClick(View v) {
@@ -244,4 +217,6 @@ public class FragmentLogin extends Fragment implements View.OnClickListener{
                 break;
         }
     }
+
+
 }

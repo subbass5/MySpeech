@@ -1,9 +1,15 @@
 package recognitioncom.speech.myspeech.Fragment;
 
 import android.app.ProgressDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,6 +24,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -30,8 +37,11 @@ import recognitioncom.speech.myspeech.Retrofit.CallbackCategoriesListener;
 import recognitioncom.speech.myspeech.Retrofit.NetworkConnectionManager;
 import recognitioncom.speech.myspeech.TTS.MyTTS;
 
+import static android.app.Activity.RESULT_OK;
+
 public class FragmentMainApp extends Fragment {
 
+    private final int REQ_CODE_SPEECH_INPUT = 1001;
     Context context;
     RecyclerView recyclerView;
     MainappRecycleAdp adp;
@@ -51,7 +61,7 @@ public class FragmentMainApp extends Fragment {
     private void initInstance(View v){
 //        MyTTS.getInstance(getContext()).setLocale(new Locale("th"))
 //                .speak("พดเพ้ได้ได");
-            ((AppCompatActivity) getActivity()).getSupportActionBar().show(); // hide tools bar
+            ((AppCompatActivity) getActivity()).getSupportActionBar().hide(); // hide tools bar
 
             context = getContext();
             recyclerView = v.findViewById(R.id.mainApprecycle);
@@ -65,9 +75,8 @@ public class FragmentMainApp extends Fragment {
             progressDialog.setMessage(getString(R.string.progressLoading));
             progressDialog.show();
 
+
             new NetworkConnectionManager().callCategories(listener);
-
-
 
     }
 
@@ -82,6 +91,33 @@ public class FragmentMainApp extends Fragment {
 
             adp.UpdateData(categories);
             recyclerView.setAdapter(adp);
+            try {
+                String url = "http://192.168.1.4:81/sound/A.wav"; // your URL here
+                MediaPlayer mediaPlayer = new MediaPlayer();
+                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                mediaPlayer.setDataSource(url);
+                mediaPlayer.prepare(); // might take long! (for buffering, etc)
+                mediaPlayer.start();
+                new CountDownTimer(mediaPlayer.getDuration(),1000){
+
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        Toast.makeText(context, "Finish!", Toast.LENGTH_SHORT).show();
+                        promptSpeechInput();
+                    }
+                }.start();
+
+                Toast.makeText(context, ""+ mediaPlayer.getDuration(), Toast.LENGTH_SHORT).show();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
 
 
         }
@@ -109,6 +145,45 @@ public class FragmentMainApp extends Fragment {
             Toast.makeText(context, ""+t.getMessage(), Toast.LENGTH_SHORT).show();
         }
     };
+
+    private void promptSpeechInput() {
+        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+
+        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "th-TH");
+        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+                getString(R.string.speech_prompt));
+
+
+        try {
+            startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
+        } catch (ActivityNotFoundException a) {
+            Toast.makeText(context,
+                    getString(R.string.speech_not_supported),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+    /**
+     * Receiving speech input
+     * */
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case REQ_CODE_SPEECH_INPUT: {
+                if (resultCode == RESULT_OK && null != data) {
+
+                    ArrayList<String> result = data
+                            .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                    MyTTS.getInstance(context).setLocale(new Locale("th")).speak(" "+result.get(0));
+                    Toast.makeText(context, result.get(0), Toast.LENGTH_SHORT).show();
+                }
+                break;
+            }
+
+        }
+    }
+
 
 
 }

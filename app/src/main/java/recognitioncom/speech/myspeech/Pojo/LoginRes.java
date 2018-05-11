@@ -4,22 +4,25 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class LoginRes {
-    @SerializedName("ID")
+    @SerializedName("id")
     @Expose
-    private String iD;
-    @SerializedName("Name")
+    private String id;
+    @SerializedName("name")
     @Expose
     private String name;
-    @SerializedName("Email")
+    @SerializedName("email")
     @Expose
     private String email;
+    @SerializedName("countchack")
+    @Expose
+    private String countchack;
 
-    public String getID() {
-        return iD;
+    public String getId() {
+        return id;
     }
 
-    public void setID(String iD) {
-        this.iD = iD;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -36,5 +39,13 @@ public class LoginRes {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getCountchack() {
+        return countchack;
+    }
+
+    public void setCountchack(String countchack) {
+        this.countchack = countchack;
     }
 }

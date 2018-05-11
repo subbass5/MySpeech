@@ -26,8 +26,9 @@ public class FragmentRegister extends Fragment implements View.OnClickListener{
 
     Context context;
     ProgressDialog progress;
-    EditText etName,etEmail,etPassword;
+    EditText etName,etPassword,et_numCount;
     private String TAG = "FragmentRegister";
+    FragmentManager fragmentManager;
 
     @Nullable
     @Override
@@ -47,20 +48,23 @@ public class FragmentRegister extends Fragment implements View.OnClickListener{
         v.findViewById(R.id.btnReset).setOnClickListener(this);
 
         etName = v.findViewById(R.id.et_name);
-        etEmail = v.findViewById(R.id.et_email);
         etPassword = v.findViewById(R.id.et_password);
+        et_numCount = v.findViewById(R.id.et_numLogin);
         context = getContext();
+        fragmentManager = getActivity().getSupportFragmentManager();
 
 
     }
 
     private void register(){
         try{
+
            String name =  etName.getText().toString().trim();
-           String email = etEmail.getText().toString().trim();
            String password = etPassword.getText().toString().trim();
-            if(!name.isEmpty() && !email.isEmpty() &&  !password.isEmpty()){
-                new NetworkConnectionManager().callRegister(listener,name,email,password);
+           String numcount = et_numCount.getText().toString().trim();
+
+            if(!name.isEmpty() && !numcount.isEmpty() &&  !password.isEmpty()){
+                new NetworkConnectionManager().callRegister(listener,name,password,numcount);
                 progress = new ProgressDialog(context);
                 progress.setMessage(getString(R.string.progressLoading));
                 progress.show();
@@ -80,8 +84,8 @@ public class FragmentRegister extends Fragment implements View.OnClickListener{
     private void reset(){
 
         etPassword.setText("");
-        etEmail.setText("");
         etPassword.setText("");
+        et_numCount.setText("");
 
     }
 
@@ -99,8 +103,12 @@ public class FragmentRegister extends Fragment implements View.OnClickListener{
                 progress.dismiss();
 
             }
-            FragmentLogin fragmentLogin = new FragmentLogin();
-            fragmentTran(fragmentLogin,null);
+
+//            fragmentManager.popBackStack();
+            Log.e(TAG,registerRes.getStatus());
+
+            Toast.makeText(context, "สมัครสมาชิกเรียบร้อยแล้ว", Toast.LENGTH_SHORT).show();
+
         }
 
         @Override

@@ -16,11 +16,11 @@ public interface APIService {
 
     @FormUrlEncoded
     @POST("apigame/login/")
-    Call<LoginRes> logIn(@Field("username") String usr, @Field("password") String pwd);
+    Call<LoginRes> logIn(@Field("username") String usr);
 
     @FormUrlEncoded
     @POST("apigame/register/")
-    Call<RegisterRes> register(@Field("name") String name,@Field("email") String email,@Field("password") String pwd);
+    Call<RegisterRes> register(@Field("name") String name,@Field("password") String email,@Field("countcheck") String pwd);
 
 
     @GET("apigame/list-categories/")

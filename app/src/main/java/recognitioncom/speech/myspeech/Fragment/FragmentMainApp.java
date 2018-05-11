@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
@@ -15,6 +16,9 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -48,7 +52,16 @@ public class FragmentMainApp extends Fragment {
     ProgressDialog progressDialog;
     String TAG = "<FragmentMainApp>";
     List<String> categories;
+    List<String>  urlList;
+    SwipeRefreshLayout mSwipeRefreshLayout;
 
+    SharedPreferences sharedPreferences ;
+    SharedPreferences.Editor editor;
+    FragmentManager fragmentManager;
+
+    //play sound
+    String url = "https://firebasestorage.googleapis.com/v0/b/project1-98b7f.appspot.com/o/A.wav?alt=media&token=a077b85a-c966-4d3d-bd22-3c250b762550";
+    MediaPlayer mPlayer;
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -62,7 +75,7 @@ public class FragmentMainApp extends Fragment {
 //        MyTTS.getInstance(getContext()).setLocale(new Locale("th"))
 //                .speak("พดเพ้ได้ได");
             ((AppCompatActivity) getActivity()).getSupportActionBar().hide(); // hide tools bar
-
+            fragmentManager = getActivity().getSupportFragmentManager();
             context = getContext();
             recyclerView = v.findViewById(R.id.mainApprecycle);
             recyclerView.setLayoutManager(new LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false));
@@ -70,13 +83,37 @@ public class FragmentMainApp extends Fragment {
             adp = new MainappRecycleAdp(context);
 
             categories = new ArrayList<>();
+            urlList = new ArrayList<>();
 
             progressDialog = new ProgressDialog(context);
             progressDialog.setMessage(getString(R.string.progressLoading));
             progressDialog.show();
 
+            try {
+                mPlayer = new MediaPlayer();
+                mPlayer.setDataSource(url);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-            new NetworkConnectionManager().callCategories(listener);
+            mSwipeRefreshLayout = v.findViewById(R.id.swipeRefreshLayout);
+            mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                @Override
+                public void onRefresh() {
+
+                    if(mPlayer.isPlaying())
+                        mPlayer.stop();
+
+                    promptSpeechInput();
+                    mSwipeRefreshLayout.setRefreshing(false);
+
+                }
+            });
+
+        sharedPreferences = getActivity().getSharedPreferences(FragmentLogin.MYFER,Context.MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+
+        new NetworkConnectionManager().callCategories(listener);
 
     }
 
@@ -86,39 +123,12 @@ public class FragmentMainApp extends Fragment {
             if (progressDialog.isShowing())
                 progressDialog.dismiss();
             for (int i  = 0; i<res.size();i++){
-                categories.add(res.get(i).getCategoryName());
+                categories.add("หมวด"+res.get(i).getCategoryName());
             }
 
             adp.UpdateData(categories);
             recyclerView.setAdapter(adp);
-            try {
-                String url = "http://192.168.1.4:81/sound/A.wav"; // your URL here
-                MediaPlayer mediaPlayer = new MediaPlayer();
-                mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                mediaPlayer.setDataSource(url);
-                mediaPlayer.prepare(); // might take long! (for buffering, etc)
-                mediaPlayer.start();
-                new CountDownTimer(mediaPlayer.getDuration(),1000){
-
-                    @Override
-                    public void onTick(long millisUntilFinished) {
-
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        Toast.makeText(context, "Finish!", Toast.LENGTH_SHORT).show();
-                        promptSpeechInput();
-                    }
-                }.start();
-
-                Toast.makeText(context, ""+ mediaPlayer.getDuration(), Toast.LENGTH_SHORT).show();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
+            playMainSound();
 
         }
 
@@ -146,21 +156,83 @@ public class FragmentMainApp extends Fragment {
         }
     };
 
-    private void promptSpeechInput() {
-        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
 
-        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "th-TH");
-        intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
-                getString(R.string.speech_prompt));
+    private void playMainSound(){
+
+        // Initialize a new media player instance
+
+
+        // Set the media player audio stream type
+        mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+        //Try to play music/audio from url
+        try{
+
+            // Prepare the media player
+            mPlayer.prepare();
+
+            // Start playing audio from http url
+            mPlayer.start();
+
+            // Inform user for audio streaming
+//            Toast.makeText(context,"Playing",Toast.LENGTH_SHORT).show();
+        }catch (IOException e){
+            // Catch the exception
+            e.printStackTrace();
+        }catch (IllegalArgumentException e){
+            e.printStackTrace();
+        }catch (SecurityException e){
+            e.printStackTrace();
+        }catch (IllegalStateException e){
+            e.printStackTrace();
+        }
+
+        mPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+//                Toast.makeText(context,"End",Toast.LENGTH_SHORT).show();
+                try {
+                    promptSpeechInput();
+                }catch (Exception e){
+
+                }
+
+            }
+        });
+    }
+
+    private void promptSpeechInput() {
+
 
 
         try {
+            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, "th-TH");
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT,
+                    getString(R.string.speech_prompt));
+
             startActivityForResult(intent, REQ_CODE_SPEECH_INPUT);
         } catch (ActivityNotFoundException a) {
             Toast.makeText(context,
                     getString(R.string.speech_not_supported),
                     Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    private void setGoFragment(String input){
+
+        editor.putString(FragmentLogin.KEY_CATEGORY,input);
+        editor.commit();
+        FragmentMainCategory mainCategory = new FragmentMainCategory();
+        fragmentTran(mainCategory,null);
+    }
+
+    public void fragmentTran(Fragment fragment, Bundle bundle){
+
+        FragmentManager fragmentManager =((AppCompatActivity) context).getSupportFragmentManager();
+        FragmentTransaction frgTran = fragmentManager.beginTransaction();
+        frgTran.replace(R.id.contentApp, fragment).addToBackStack(null).commit();
     }
     /**
      * Receiving speech input
@@ -175,8 +247,24 @@ public class FragmentMainApp extends Fragment {
 
                     ArrayList<String> result = data
                             .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                    MyTTS.getInstance(context).setLocale(new Locale("th")).speak(" "+result.get(0));
+
                     Toast.makeText(context, result.get(0), Toast.LENGTH_SHORT).show();
+                    for (int i = 0;i<categories.size();i++){
+                        if(categories.get(i).equals(result.get(0)) ){
+                            setGoFragment(result.get(0));
+                            MyTTS.getInstance(context).setLocale(new Locale("th")).speak("เข้าสู่โหมด "+result.get(0));
+
+                        }
+                    }
+                    if(result.get(0).equals("ออกจากระบบ")){
+                        editor.clear();
+                        editor.commit();
+                        fragmentManager.popBackStack();
+//                        Toast.makeText(context, "ออกจากระบบ", Toast.LENGTH_SHORT).show();
+                        MyTTS.getInstance(context).setLocale(new Locale("th")).speak("ตุณได้ออกจากระบบเรียบร้อยแล้ว");
+
+                    }
+
                 }
                 break;
             }
@@ -184,6 +272,21 @@ public class FragmentMainApp extends Fragment {
         }
     }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        mPlayer.pause();
+    }
 
+    @Override
+    public void onStop() {
+        super.onStop();
+        mPlayer.stop();
+    }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mPlayer.release();
+    }
 }

@@ -1,16 +1,11 @@
 package recognitioncom.speech.myspeech.Fragment;
 
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.media.AudioManager;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.speech.RecognizerIntent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -21,13 +16,13 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Locale;
 
 
 import okhttp3.ResponseBody;
@@ -35,30 +30,29 @@ import recognitioncom.speech.myspeech.Pojo.LoginRes;
 import recognitioncom.speech.myspeech.R;
 import recognitioncom.speech.myspeech.Retrofit.NetworkConnectionManager;
 import recognitioncom.speech.myspeech.Retrofit.CallbackLoginListener;
-import recognitioncom.speech.myspeech.TTS.MyTTS;
-
-import static android.app.Activity.RESULT_OK;
 
 public class FragmentLogin extends Fragment implements View.OnClickListener{
 
     Context context;
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
-    private EditText et_user,et_pwd;
+    private EditText et_user;
 
 
 
     public static final String MYFER = "myFer";
     public static final String KEY_ID = "idUser";
     public static final String KEY_NAME ="nameUser";
-    public static final String KEY_EMAIL = "emailUser";
+    public static final String KEY_COUNTCHECK = "emailUser";
     public static final String KEY_CATEGORY = "category";
+    public static final String KEY_URL_MAIN_CATEGORY = "mainCategories";
+    public static final String KEY_DO_REGISTER = "doRegister";
     private String usr = "";
     private String pwd = "";
     private String TAG = "FragmentLogin";
     private CheckBox checkBox;
     private ProgressDialog progress;
-
+     int Count = 0;
 
     @Nullable
     @Override
@@ -94,17 +88,18 @@ public class FragmentLogin extends Fragment implements View.OnClickListener{
         v.findViewById(R.id.btn_login).setOnClickListener(this);
         v.findViewById(R.id.tv_register).setOnClickListener(this);
 
-        checkBox = v.findViewById(R.id.chkRemeber);
+//        checkBox = v.findViewById(R.id.chkRemeber);
 
         et_user = v.findViewById(R.id.et_username);
-        et_pwd  = v.findViewById(R.id.et_password);
 
         et_user.setText("test");
-        et_pwd.setText("0850400151");
+
 
         sharedPreferences = getActivity().getSharedPreferences(MYFER,Context.MODE_PRIVATE);
         editor = sharedPreferences.edit();
 
+        editor.putBoolean(KEY_DO_REGISTER,false);
+        editor.commit();
 
 
     }
@@ -112,18 +107,17 @@ public class FragmentLogin extends Fragment implements View.OnClickListener{
     private void login(){
 
 
-
-
         usr = et_user.getText().toString().trim();
-        pwd = et_pwd.getText().toString().trim();
 
-        if(usr.length() >3 && usr.length() >3 ){
+
+        if(usr.length() > 3 && usr.length() >3 ){
 
             progress = new ProgressDialog(context);
             progress.setMessage(getString(R.string.progressLoading));
             progress.show();
 
-            new NetworkConnectionManager().callLogin(listener,usr,pwd);
+            new NetworkConnectionManager().callLogin(listener,usr);
+
         }
 
 
@@ -132,6 +126,9 @@ public class FragmentLogin extends Fragment implements View.OnClickListener{
     }
 
     private void  register(){
+
+        editor.putBoolean(KEY_DO_REGISTER,true);
+        editor.commit();
 
         FragmentRegister fragmentMainApp = new FragmentRegister();
         fragmentTran(fragmentMainApp,null);
@@ -147,6 +144,45 @@ public class FragmentLogin extends Fragment implements View.OnClickListener{
         frgTran.replace(R.id.contentApp, fragment).addToBackStack(null).commit();
     }
 
+    private void checkTuch(final int input){
+
+        LayoutInflater layoutInflater = getLayoutInflater();
+        View view = layoutInflater.inflate(R.layout.custom_tuch_dialog,null);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        builder.setView(view);
+        Button btn = view.findViewById(R.id.button);
+        final AlertDialog dialog = builder.create();
+
+
+       btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                Toast.makeText(context, "do click = "+Count+" input = "+input, Toast.LENGTH_SHORT).show();
+
+                if(Count == input){
+
+//                    Toast.makeText(context
+//                            , "CLick success", Toast.LENGTH_SHORT).show();
+                    FragmentMainApp fragmentMainApp = new FragmentMainApp();
+                    fragmentTran(fragmentMainApp,null);
+                    dialog.dismiss();
+
+                }else {
+
+                    Count+=1;
+                }
+            }
+        });
+
+        dialog.show();
+        dialog.getWindow().setLayout(1024,425);
+
+//
+
+    }
+
     CallbackLoginListener listener = new CallbackLoginListener() {
         @Override
         public void onResponse(LoginRes loginRes) {
@@ -158,15 +194,14 @@ public class FragmentLogin extends Fragment implements View.OnClickListener{
 
             }
 
-
-            editor.putString(KEY_ID,loginRes.getID());
+            editor.putString(KEY_ID,loginRes.getId());
             editor.putString(KEY_NAME,loginRes.getName());
-            editor.putString(KEY_EMAIL,loginRes.getEmail());
+            editor.putString(KEY_COUNTCHECK,loginRes.getCountchack());
             editor.commit();
+            Count  = 1;
+            checkTuch(Integer.parseInt(loginRes.getCountchack()));
 
-            FragmentMainApp fragmentMainApp = new FragmentMainApp();
-            fragmentTran(fragmentMainApp,null);
-
+//            Toast.makeText(context, ""+loginRes.getCountchack(), Toast.LENGTH_SHORT).show();
 
         }
 
@@ -217,6 +252,7 @@ public class FragmentLogin extends Fragment implements View.OnClickListener{
                 break;
         }
     }
+
 
 
 }

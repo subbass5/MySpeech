@@ -79,18 +79,20 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 //        super.onBackPressed();
-
+        boolean doRegister = sharedPreferences.getBoolean(FragmentLogin.KEY_DO_REGISTER,false);
 
         int co = fragmentManager.getBackStackEntryCount();
 //        Toast.makeText(this, ""+co, Toast.LENGTH_SHORT).show();
-        if(co > 2 ){
+        if(co > 2 || doRegister){
             fragmentManager.popBackStack();
         }
 
-        if(co == 2 ){
+        if(co == 2 && !doRegister){
+
             onLogout();
 //            Toast.makeText(this, "Logout ", Toast.LENGTH_SHORT).show();
         }
+
 
     }
 

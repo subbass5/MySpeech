@@ -24,7 +24,7 @@ public class NetworkConnectionManager {
 
     }
 
-    public void callLogin(final CallbackLoginListener listener, String usr, String pwd){
+    public void callLogin(final CallbackLoginListener listener, String usr){
         Gson gson = new GsonBuilder()
                 .setLenient()
                 .create();
@@ -35,8 +35,8 @@ public class NetworkConnectionManager {
                 .build();
 
         APIService git = retrofit.create(APIService.class);
-        Call call = git.logIn(usr,pwd);
-        Log.d(TAG,"user = "+usr+" pass ="+pwd);
+        Call call = git.logIn(usr);
+
 
         call.enqueue(new Callback<LoginRes>() {
 
@@ -81,7 +81,7 @@ public class NetworkConnectionManager {
 
     }
 
-    public void callRegister(final CallbackRegisterListener listener, String usr, String email, String pwd){
+    public void callRegister(final CallbackRegisterListener listener, String usr, String pwd,String numChk){
 
         Gson gson = new GsonBuilder()
                 .setLenient()
@@ -93,7 +93,7 @@ public class NetworkConnectionManager {
                 .build();
 
         APIService git = retrofit.create(APIService.class);
-        Call call = git.register(usr,email,pwd);
+        Call call = git.register(usr,pwd,numChk);
 
 
         call.enqueue(new Callback<RegisterRes>() {

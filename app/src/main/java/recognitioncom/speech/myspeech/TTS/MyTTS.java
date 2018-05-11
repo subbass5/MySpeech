@@ -63,12 +63,16 @@ public class MyTTS extends UtteranceProgressListener implements TextToSpeech.OnI
         return this;
     }
 
+
     private void startSpeak() {
         speakCount++;
 
         if (locale != null) {
             tts.setLanguage(locale);
         }
+
+
+        tts.setSpeechRate(0.6f);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             tts.speak(message, TextToSpeech.QUEUE_FLUSH, null, "");

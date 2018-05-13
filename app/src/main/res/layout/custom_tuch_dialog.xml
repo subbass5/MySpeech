@@ -8,7 +8,7 @@
 
     <Button
         android:id="@+id/button"
-        android:backgroundTint="@color/colorPrimaryDark"
+        android:backgroundTint="@color/colorPrimary"
         android:drawableTop="@drawable/ic_pan"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"

@@ -106,8 +106,18 @@ public class FragmentRegister extends Fragment implements View.OnClickListener{
 
 //            fragmentManager.popBackStack();
             Log.e(TAG,registerRes.getStatus());
+            if(registerRes.getStatus().equals("Sorry this name is already")){
+                etName.setText("");
+                et_numCount.setText("");
+                etPassword.setText("");
+                Toast.makeText(context, "ชื่อที่ใช้ในการสมัครซ้ำ!", Toast.LENGTH_SHORT).show();
 
-            Toast.makeText(context, "สมัครสมาชิกเรียบร้อยแล้ว", Toast.LENGTH_SHORT).show();
+            }else {
+                Toast.makeText(context, "สมัครสมาชิกเรียบร้อยแล้ว", Toast.LENGTH_SHORT).show();
+                fragmentManager.popBackStack();
+            }
+
+
 
         }
 

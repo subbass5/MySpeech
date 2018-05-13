@@ -82,7 +82,9 @@ public class MainappRecycleAdp extends RecyclerView.Adapter<MainappRecycleAdp.My
 
     @Override
     public int getItemCount() {
+
         return categories.size();
+
     }
 
     public void fragmentTran(Fragment fragment, Bundle bundle){

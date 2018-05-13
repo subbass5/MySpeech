@@ -248,11 +248,11 @@ public class FragmentMainApp extends Fragment {
                     ArrayList<String> result = data
                             .getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
 
-                    Toast.makeText(context, result.get(0), Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(context, result.get(0), Toast.LENGTH_SHORT).show();
                     for (int i = 0;i<categories.size();i++){
-                        if(categories.get(i).equals(result.get(0)) ){
-                            setGoFragment(result.get(0));
-                            MyTTS.getInstance(context).setLocale(new Locale("th")).speak("เข้าสู่โหมด "+result.get(0));
+                        if(categories.get(i).equals(result.get(0)) || result.get(0).equals(""+(i+1))){
+                            setGoFragment(categories.get(i));
+//                            MyTTS.getInstance(context).setLocale(new Locale("th")).speak("เข้าสู่โหมด "+result.get(0));
 
                         }
                     }

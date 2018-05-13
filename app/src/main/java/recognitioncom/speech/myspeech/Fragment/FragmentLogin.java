@@ -47,6 +47,15 @@ public class FragmentLogin extends Fragment implements View.OnClickListener{
     public static final String KEY_CATEGORY = "category";
     public static final String KEY_URL_MAIN_CATEGORY = "mainCategories";
     public static final String KEY_DO_REGISTER = "doRegister";
+
+    public static final String KEY_HEADER_SOUND = "header_sound";
+    public static final String KEY_NO1 = "no1";
+    public static final String KEY_NO2 = "no2";
+    public static final String KEY_NO3 = "no3";
+    public static final String KEY_NO4 = "no4";
+    public static final String KEY_NO5 = "no5";
+    public static final String KEY_URL_SOUND_MAIN = "urlMain";
+
     private String usr = "";
     private String pwd = "";
     private String TAG = "FragmentLogin";
@@ -110,7 +119,7 @@ public class FragmentLogin extends Fragment implements View.OnClickListener{
         usr = et_user.getText().toString().trim();
 
 
-        if(usr.length() > 3 && usr.length() >3 ){
+        if(usr.length() > 0){
 
             progress = new ProgressDialog(context);
             progress.setMessage(getString(R.string.progressLoading));

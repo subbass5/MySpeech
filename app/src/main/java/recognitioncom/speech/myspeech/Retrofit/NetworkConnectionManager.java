@@ -11,6 +11,7 @@ import okhttp3.ResponseBody;
 import recognitioncom.speech.myspeech.MainActivity;
 import recognitioncom.speech.myspeech.Pojo.CategoriesRes;
 import recognitioncom.speech.myspeech.Pojo.LoginRes;
+import recognitioncom.speech.myspeech.Pojo.QuestionRes;
 import recognitioncom.speech.myspeech.Pojo.RegisterRes;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -185,6 +186,62 @@ public class NetworkConnectionManager {
             }
             @Override
             public void onFailure(Call<List<CategoriesRes>> call, Throwable t) {
+
+                listener.onFailure(t);
+
+            }
+            
+        });
+
+
+
+    }
+    public void callQuestion(final CallbackQuestionListenner listener,String category){
+
+        Gson gson = new GsonBuilder()
+                .setLenient()
+                .create();
+
+        final Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(MainActivity.BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+
+        APIService git = retrofit.create(APIService.class);
+        Call call = git.justPlay(category);
+
+
+        call.enqueue(new Callback<List<QuestionRes>>() {
+
+            @Override
+            public void onResponse(Call<List<QuestionRes>> call, Response<List<QuestionRes>> response) {
+
+                try {
+
+                    List<QuestionRes> categoriesRes =  response.body();
+
+                    if (response.code() != 200) {
+//                        Log.e("Network connected","Response code = "+response.code());
+
+                        ResponseBody responseBody = response.errorBody();
+
+                        if (responseBody != null) {
+                            listener.onBodyError(responseBody);
+                        } else if (responseBody == null) {
+                            listener.onBodyErrorIsNull();
+                        }
+
+                    } else {
+                        listener.onResponse(categoriesRes);
+                    }
+
+
+                }catch (Exception e){
+                    listener.onFailure(e);
+                }
+            }
+            @Override
+            public void onFailure(Call<List<QuestionRes>> call, Throwable t) {
 
                 listener.onFailure(t);
 

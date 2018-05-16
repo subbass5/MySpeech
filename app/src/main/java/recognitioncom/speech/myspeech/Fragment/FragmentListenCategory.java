@@ -72,6 +72,9 @@ public class FragmentListenCategory extends Fragment{
         tv_no4.setText("4."+sharedPreferences.getString(FragmentLogin.KEY_NO4,""));
         if(!sharedPreferences.getString(FragmentLogin.KEY_NO5,"").isEmpty())
         tv_no5.setText("5."+sharedPreferences.getString(FragmentLogin.KEY_NO5,""));
+        else
+            tv_no5.setText("");
+
 
         swipeRefreshLayout = v.findViewById(R.id.swipeRefreshLayout);
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {

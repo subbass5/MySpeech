@@ -18,7 +18,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 public class MainActivity extends AppCompatActivity {
 
     FragmentLogin loginFrg;
-    public static final String BASE_URL = "http://mumei-system.ml/";
+    public static final String BASE_URL = "http://profile2.chiangraisoftware.com/";    //"http://mumei-system.ml/";
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor editor;
     FragmentManager fragmentManager;
